@@ -1,0 +1,112 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  # ---- 第 1 步：从 tauri.conf.json 读取版本号，自动打 tag ----
+  create-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      tag: ${{ steps.get-version.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version from tauri.conf.json
+        id: get-version
+        run: |
+          VERSION=$(grep '"version"' src-tauri/tauri.conf.json | head -1 | sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
+          TAG="v${VERSION}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Detected version: ${VERSION}, tag: ${TAG}"
+
+      - name: Create tag if not exists
+        run: |
+          TAG="${{ steps.get-version.outputs.tag }}"
+          if ! git rev-parse "$TAG" >/dev/null 2>&1; then
+            git tag "$TAG"
+            git push origin "$TAG"
+            echo "Created and pushed tag: $TAG"
+          else
+            echo "Tag $TAG already exists, skipping"
+          fi
+
+  # ---- 第 2 步：三平台并行构建 + 上传到 Release ----
+  build:
+    needs: create-tag
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
+          - platform: macos-latest
+            target: aarch64-apple-darwin
+          - platform: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: Build & upload to Release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ needs.create-tag.outputs.tag }}
+          releaseName: "Claude Proxy ${{ needs.create-tag.outputs.tag }}"
+          releaseBody: |
+            ## Claude Proxy ${{ needs.create-tag.outputs.tag }}
+
+            本地反向代理 · 模型名映射工具
+
+            ### 下载
+            选择对应平台的安装包下载即可：
+            - **Windows**: `.msi` 或 `.exe` 安装包
+            - **macOS**: `.dmg`（Apple Silicon）
+            - **Linux**: `.deb` 或 `.AppImage`
+          releaseDraft: false
+          prerelease: false
+          args: --target ${{ matrix.target }}

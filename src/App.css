@@ -1,0 +1,406 @@
+/* ============================================================
+   马卡龙浅色风格
+   ============================================================ */
+:root {
+  --bg:          #FFF9F5;
+  --card:        #FFFFFF;
+  --mint:        #A8E6CF;
+  --mint-dark:   #8FD4B8;
+  --mint-deeper: #7CC3A5;
+  --mint-text:   #3D6B52;
+  --mint-bg:     #F0FFF5;
+  --mint-border: #C8E6D4;
+  --strawberry:  #FFB7C5;
+  --strawberry-dark: #FFA0B5;
+  --strawberry-deeper: #FF8DA5;
+  --strawberry-text: #8B3A4A;
+  --lavender:    #C3B1E1;
+  --lemon:       #E8C86A;
+  --blueberry:   #89B8D4;
+  --text-primary:   #4A4A4A;
+  --text-secondary: #8B8B8B;
+  --text-label:     #B0B0B0;
+  --border:      #EBEBEB;
+  --border-hover:#D0D0D0;
+  --input-bg:    #FAFAFA;
+  --row-bg:      #FFF5F8;
+  --row-border:  #FFE0E8;
+
+  font-family: 'SF Pro Text', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei',
+               -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ============================================================
+   App 容器
+   ============================================================ */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 14px 18px;
+  gap: 10px;
+}
+
+/* ============================================================
+   顶部控制栏
+   ============================================================ */
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 18px;
+  flex-shrink: 0;
+}
+
+.port-label {
+  color: var(--text-label);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.port-input {
+  width: 80px;
+  height: 34px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 10px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.port-input:focus {
+  border-color: var(--mint);
+  background: var(--card);
+}
+
+.sep {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+}
+
+.toggle-btn {
+  height: 34px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.toggle-btn.start {
+  background-color: var(--mint);
+  color: var(--mint-text);
+}
+.toggle-btn.start:hover { background-color: var(--mint-dark); }
+.toggle-btn.start:active { background-color: var(--mint-deeper); }
+
+.toggle-btn.stop {
+  background-color: var(--strawberry);
+  color: var(--strawberry-text);
+}
+.toggle-btn.stop:hover { background-color: var(--strawberry-dark); }
+.toggle-btn.stop:active { background-color: var(--strawberry-deeper); }
+
+.status {
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 4px;
+}
+.status.off { color: var(--text-label); }
+.status.on  { color: #6BBF8A; }
+
+/* ============================================================
+   中间主区域
+   ============================================================ */
+.main {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+}
+
+.panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.client-panel { flex: 2; }
+.forward-panel { flex: 3; }
+
+.panel-inner {
+  padding: 16px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.panel-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-label);
+  margin-bottom: 12px;
+  letter-spacing: 0.3px;
+}
+
+.hint {
+  color: #A0A0A0;
+  font-size: 11px;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+/* ---- 字段 ---- */
+.field-label {
+  display: block;
+  color: var(--text-label);
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.field-input {
+  width: 100%;
+  height: 34px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 10px;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+.field-input:focus {
+  border-color: var(--mint);
+  background: var(--card);
+}
+.field-input:hover:not(:focus) {
+  border-color: var(--border-hover);
+}
+.field-input.readonly {
+  background: var(--mint-bg);
+  color: #6BBF8A;
+  border-color: var(--mint-border);
+}
+.field-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---- 映射标题行 ---- */
+.mapping-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 14px;
+  margin-bottom: 6px;
+}
+
+.mapping-hint {
+  color: #C8C8C8;
+  font-size: 10px;
+}
+
+/* ---- 映射列表 ---- */
+.mapping-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 0;
+  padding-right: 2px;
+}
+
+/* 自定义滚动条 */
+.mapping-list::-webkit-scrollbar {
+  width: 5px;
+}
+.mapping-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.mapping-list::-webkit-scrollbar-thumb {
+  background: #D5D5D5;
+  border-radius: 3px;
+}
+.mapping-list::-webkit-scrollbar-thumb:hover {
+  background: #B0B0B0;
+}
+
+.mapping-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--row-bg);
+  border: 1px solid var(--row-border);
+  border-radius: 8px;
+  padding: 5px 8px;
+  flex-shrink: 0;
+}
+
+.mapping-input {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  background: var(--card);
+}
+
+.arrow {
+  color: var(--mint);
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+.remove-btn {
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  color: #C8C8C8;
+  font-size: 16px;
+  border-radius: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.15s, background-color 0.15s;
+}
+.remove-btn:hover {
+  color: var(--strawberry);
+  background: #FFF0F3;
+}
+.remove-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- 添加按钮 ---- */
+.add-btn {
+  height: 34px;
+  margin-top: 6px;
+  background: transparent;
+  border: 1px dashed #D5D5D5;
+  border-radius: 8px;
+  color: var(--text-label);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+  flex-shrink: 0;
+}
+.add-btn:hover {
+  border-color: var(--mint);
+  color: #6BBF8A;
+  background: var(--mint-bg);
+}
+.add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   日志区域
+   ============================================================ */
+.log-section {
+  flex-shrink: 0;
+}
+
+.log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+  margin-bottom: 4px;
+}
+
+.log-title {
+  color: var(--text-label);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.log-toggle {
+  width: 44px;
+  height: 22px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-label);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.log-toggle:hover {
+  background: var(--mint-bg);
+  border-color: var(--mint-border);
+  color: #6BBF8A;
+}
+
+.log-body {
+  height: 140px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  overflow-y: auto;
+  font-family: 'Cascadia Code', 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.log-body::-webkit-scrollbar {
+  width: 5px;
+}
+.log-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.log-body::-webkit-scrollbar-thumb {
+  background: #D5D5D5;
+  border-radius: 3px;
+}
+
+.log-empty {
+  color: #C8C8C8;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.log-line {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.log-ts {
+  color: #C8C8C8;
+  margin-right: 8px;
+}
