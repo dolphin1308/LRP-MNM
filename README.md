@@ -32,8 +32,9 @@
 Claude 桌面客户端会对请求中的模型名称进行校验，只允许官方模型名（如 `claude-3-5-sonnet-20241022`）。直接使用第三方 API 会提示连接失败：
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/YOUR_USERNAME/LRP_MNM/main/question.jpg" alt="Claude 客户端 API 连接失败" width="600">
+  <img src="question.jpg" alt="Claude 客户端 API 连接失败" width="600">
 </p>
+
 
 本工具在本地启动一个 HTTP 代理服务，解决上述问题：
 
@@ -178,8 +179,9 @@ npm run tauri build
 打开 Claude 桌面客户端设置，选择 **Use custom API base URL**，填入代理地址：
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/YOUR_USERNAME/LRP_MNM/main/address.png" alt="Claude 客户端 API URL 配置" width="500">
+  <img src="address.png" alt="Claude 客户端 API URL 配置" width="500">
 </p>
+
 
 | 配置项 | 填写内容 |
 |--------|---------|
