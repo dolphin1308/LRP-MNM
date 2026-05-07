@@ -185,8 +185,11 @@ async fn handle_proxy(
             }).await;
             return Response::builder()
                 .status(StatusCode::BAD_REQUEST)
+                .header("Content-Type", "application/json")
                 .body(Body::from("{\"error\":\"failed to read body\"}"))
-                .unwrap();
+                .unwrap_or_else(|_| {
+                    Response::new(Body::from("internal proxy error"))
+                });
         }
     };
 
@@ -201,6 +204,12 @@ async fn handle_proxy(
     let base = inner.config.target_url.trim_end_matches('/');
     let target_url = format!("{}{}", base, full_path);
 
+    // 记录转发的目标 URL
+    push_log(&app_handle, &log_buffer, LogEntry {
+        level: "info".to_string(),
+        message: format!("Forward to: {}", target_url),
+    }).await;
+
     // 构建转发请求
     let mut req_builder = inner.http_client.request(method.clone(), &target_url);
     for (key, value) in headers.iter() {
@@ -208,7 +217,7 @@ async fn handle_proxy(
             req_builder = req_builder.header(key.clone(), value.clone());
         }
     }
-    if method == Method::POST || method == Method::PUT {
+    if method == Method::POST || method == Method::PUT || method == Method::PATCH {
         req_builder = req_builder.body(modified_body);
     }
 
@@ -226,7 +235,9 @@ async fn handle_proxy(
                 .body(Body::from(format!(
                     "{{\"error\":\"proxy_error\",\"message\":\"{}\"}}", e
                 )))
-                .unwrap();
+                .unwrap_or_else(|_| {
+                    Response::new(Body::from("internal proxy error"))
+                });
         }
     };
 
@@ -254,7 +265,9 @@ async fn handle_proxy(
         r.map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
     }));
 
-    resp.body(body).unwrap()
+    resp.body(body).unwrap_or_else(|_| {
+        Response::new(Body::from("internal proxy error"))
+    })
 }
 
 /// 替换 JSON body 中的 model 字段

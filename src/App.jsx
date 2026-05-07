@@ -13,7 +13,7 @@ function App() {
   const [interceptModel, setInterceptModel] = useState("claude-sonnet-4-5");
 
   // ---- 右侧面板 ----
-  const [targetUrl, setTargetUrl] = useState("https://api.deepseek.com");
+  const [targetUrl, setTargetUrl] = useState("https://api.deepseek.com/anthropic");
   const [mappings, setMappings] = useState([
     { source: "claude-sonnet-4-5", target: "deepseek-v4-pro" },
   ]);
@@ -176,7 +176,7 @@ function App() {
               className="field-input"
               value={targetUrl}
               onChange={(e) => setTargetUrl(e.target.value)}
-              placeholder="https://api.deepseek.com"
+              placeholder="https://api.deepseek.com/anthropic"
               disabled={running}
             />
 
