@@ -175,8 +175,9 @@ async fn handle_proxy(
         message: format!("{} {}", method, path),
     }).await;
 
-    // 读取请求体
-    let body_bytes = match axum::body::to_bytes(request.into_body(), usize::MAX).await {
+    // 读取请求体（限制 10MB 防止内存耗尽）
+    let max_body_size: usize = 10 * 1024 * 1024; // 10MB
+    let body_bytes = match axum::body::to_bytes(request.into_body(), max_body_size).await {
         Ok(b) => b,
         Err(e) => {
             push_log(&app_handle, &log_buffer, LogEntry {
@@ -247,16 +248,32 @@ async fn handle_proxy(
         message: format!("Response: {}", status.as_u16()),
     }).await;
 
-    // 构建响应头
+    // 检测是否是流式响应（SSE 或 chunked）
+    let is_streaming = upstream.headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .map(|ct| ct.contains("text/event-stream"))
+        .unwrap_or(false)
+        || upstream.headers().contains_key("transfer-encoding");
+
+    // 构建响应头（完整清理 hop-by-hop headers）
+    let hop_by_hop_headers = [
+        "connection", "keep-alive", "proxy-authenticate",
+        "proxy-authorization", "te", "trailer",
+        "transfer-encoding", "upgrade",
+    ];
     let mut resp = Response::builder().status(status.as_u16());
     for (key, value) in upstream.headers().iter() {
         let k = key.as_str().to_lowercase();
-        if k == "transfer-encoding" || k == "content-length" || k == "connection" {
+        if hop_by_hop_headers.contains(&k.as_str()) {
             continue;
         }
         resp = resp.header(key.clone(), value.clone());
     }
-    resp = resp.header("Transfer-Encoding", "chunked");
+    // 流式响应用 chunked，否则保持原样
+    if is_streaming {
+        resp = resp.header("Transfer-Encoding", "chunked");
+    }
     resp = resp.header("Connection", "close");
 
     // 流式转发（SSE 支持）

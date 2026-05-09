@@ -22,6 +22,7 @@ function App() {
   const [logVisible, setLogVisible] = useState(true);
   const [logs, setLogs] = useState([]);
   const logRef = useRef(null);
+  const logIdRef = useRef(0); // 日志唯一 ID 计数器
 
   // ---- 端口变化同步 ----
   useEffect(() => {
@@ -34,7 +35,8 @@ function App() {
       const entry = event.payload;
       const now = new Date();
       const ts = now.toTimeString().slice(0, 8);
-      setLogs((prev) => [...prev, { ...entry, ts }].slice(-500));
+      const id = ++logIdRef.current; // 唯一递增 ID
+      setLogs((prev) => [...prev, { ...entry, ts, id }].slice(-500));
     });
     return () => { unlisten.then((fn) => fn()); };
   }, []);
@@ -59,10 +61,11 @@ function App() {
             mappingObj[m.source.trim()] = m.target.trim();
           }
         }
-        await invoke("start_proxy", {
+        const result = await invoke("start_proxy", {
           request: { port, target_url: targetUrl.trim(), model_mapping: mappingObj },
         });
-        setRunning(true);
+        // 根据后端实际状态设置，防止端口绑定失败时前端显示错误
+        setRunning(result.running);
       }
     } catch (e) {
       console.error("Proxy toggle error:", e);
@@ -242,8 +245,8 @@ function App() {
             {logs.length === 0 ? (
               <span className="log-empty">Waiting for requests...</span>
             ) : (
-              logs.map((log, i) => (
-                <div key={i} className="log-line">
+              logs.map((log) => (
+                <div key={log.id} className="log-line">
                   <span className="log-ts">{log.ts}</span>
                   <span style={{ color: getLogColor(log.level) }}>
                     {log.message}
